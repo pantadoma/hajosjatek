@@ -147,27 +147,60 @@ function pont_kirajzolas(pont: Pont) {
     led.plot(pont.x, pont.y)
 }
 
-let tabla : Tabla = new Tabla()
-let formak: number[] = [3, 2, 1, 1]
-let lerakott_formak:number[] = []
-do {
-    let forma_index:number = lerakott_formak.length
-    let forma = formak[forma_index]
-    console.log("forma_index:" + forma_index)
-    console.log("forma:" + forma)
-    let uj_hajo:Hajo = tabla.hajot_elhelyez(forma)        
-    if (uj_hajo != null) {
-        console.log("TOVÁBB")
-        lerakott_formak.push(forma)
-    } else {
-        console.log("VISSZA")
-        lerakott_formak = []
-        tabla.hajok = []
-    }
-    
+function tabla_letrahozas() {
+    let tabla: Tabla = new Tabla()
+    let formak: number[] = [3, 2, 1, 1]
+    let lerakott_formak: number[] = []
+    do {
+        let forma_index: number = lerakott_formak.length
+        let forma = formak[forma_index]
+        let uj_hajo: Hajo = tabla.hajot_elhelyez(forma)
+        if (uj_hajo != null) {            
+            lerakott_formak.push(forma)
+        } else {            
+            lerakott_formak = []
+            tabla.hajok = []
+        }
 
-} while (lerakott_formak.length != formak.length) 
+    } while (lerakott_formak.length != formak.length)
 
-basic.forever(function () {
+    return tabla
+}
+
+function tabla_generalas() {
+    basic.clearScreen()
+    let millis:number = control.millis()
+    let tabla: Tabla = tabla_letrahozas()
+    let millis2: number = control.millis()
+    console.log(millis2 - millis);
     tabla_kirajzolas(tabla)
+}
+
+input.onButtonPressed(Button.A, tabla_generalas)
+input.onButtonPressed(Button.B, tabla_generalas)
+
+function allapot_valtas(ertek:number) {
+
+}
+
+/*
+
+- szinkronizalas
+- palya valasztas
+- jatekos lepes
+- jatek vege
+
+*/
+
+radio.onReceivedValue(function (nev, ertek:number) {
+    switch (nev) {
+        case "ALLAPOT":
+            allapot_valtas(ertek)
+            break;
+    }
+})
+
+radio.setGroup(1)
+basic.forever(function () {
+
 })
