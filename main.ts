@@ -1,7 +1,5 @@
 function hajo_letrehozas (hossz: number) {
-    let kezdoPont: Pont = new Pont(randint(0, 5 - hossz), randint(0, 5 - hossz))
-    // console.log("kezdoPont: " + kezdoPont.toStr())
-    // console.log("==========")
+    let kezdoPont: Pont = new Pont(randint(0, 5 - hossz), randint(0, 5 - hossz))    
     let pontok: Pont[] = []
     pontok.push(kezdoPont)
     let irany: number = randint(1, 2)
@@ -26,12 +24,6 @@ function hajo_letrehozas (hossz: number) {
             let valos: boolean = uj_pont.is_valos()            
             let egyedi: boolean = !pontok.some((pont) => pont.is_ugyanaz(uj_pont))
             siker2 = valos && egyedi
-
-            //console.log("utolso_pont: " + utolso_pont.toStr())
-            //console.log("uj_pont: " + uj_pont.toStr())
-            //console.log("valos: " + valos)            
-            //console.log("siker: " + siker)            
-            //control.waitMicros(1000)
         } while (!siker2)
         pontok.push(uj_pont)
     }
@@ -93,7 +85,8 @@ class Hajo {
             }
         }
         return false
-    }    
+    }  
+
     public toStr() {
         let str:string[] = [];
         str.push("Hajo(")
@@ -113,39 +106,67 @@ class Tabla {
     public hajot_elhelyez(hossz: number) {
         let siker: boolean
         let uj_hajo: Hajo
+        let probalkozas: number = 0;
         do {
             siker = true
             uj_hajo = hajo_letrehozas(hossz)            
             for (let l = 0; l < this.hajok.length; l++) {
                 let hajo: Hajo = this.hajok[l];                   
                 if (hajo.is_szomszedos(uj_hajo)) {                    
-                    siker = false                    
+                    siker = false  
+                    break;                  
                 }
             }
-        } while (!siker)
+            probalkozas++            
+        } while (!siker && probalkozas < 100)
+        if (!siker) {
+            return null
+        }
         this.hajok.push(uj_hajo)
+        return uj_hajo
     }
+
+    public hajot_eltavolit(hajo: Hajo) {
+        this.hajok = this.hajok.filter(h => h !== hajo)
+    }
+
 }
 function tabla_kirajzolas(tabla: Tabla) {
-    for (let o = 0; o < tabla.hajok.length; o++) {
-        let hajo3: Hajo = tabla.hajok[o];
-        hajo_kirajzolas(hajo3)
+    for (let i = 0; i < tabla.hajok.length; i++) {
+        let hajo: Hajo = tabla.hajok[i];
+        hajo_kirajzolas(hajo)
     }
 }
 function hajo_kirajzolas (hajo: Hajo ) {    
-    for (let p = 0; p < hajo.hossz(); p++) {
-        let pont22: Pont = hajo.pontok[p];
-        pont_kirajzolas(pont22)
+    for (let i = 0; i < hajo.hossz(); i++) {
+        let pont: Pont = hajo.pontok[i];
+        pont_kirajzolas(pont)
     }
 }
 function pont_kirajzolas(pont: Pont) {
     led.plot(pont.x, pont.y)
 }
+
 let tabla : Tabla = new Tabla()
-let formak = [3,2,1,1]
-for (let i = 0; i <= formak.length - 1; i++) {
-    tabla.hajot_elhelyez(formak[i])
-}
+let formak: number[] = [3, 2, 1, 1]
+let lerakott_formak:number[] = []
+do {
+    let forma_index:number = lerakott_formak.length
+    let forma = formak[forma_index]
+    console.log("forma_index:" + forma_index)
+    console.log("forma:" + forma)
+    let uj_hajo:Hajo = tabla.hajot_elhelyez(forma)        
+    if (uj_hajo != null) {
+        console.log("TOVÁBB")
+        lerakott_formak.push(forma)
+    } else {
+        console.log("VISSZA")
+        lerakott_formak = []
+        tabla.hajok = []
+    }
+    
+
+} while (lerakott_formak.length != formak.length) 
 
 basic.forever(function () {
     tabla_kirajzolas(tabla)
